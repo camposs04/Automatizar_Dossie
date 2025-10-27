@@ -5,33 +5,10 @@ from docxtpl import DocxTemplate, InlineImage
 from docx import Document
 from docx.shared import Inches
 from io import BytesIO
-# Restaurando o pypandoc para conversão de Markdown
-import pypandoc
+# Revertendo a importação para a biblioteca de conversão de PDF
+from pdf2docx import parse 
 
-# =========================================================================
-# === CORREÇÃO CRÍTICA PARA DEPLOY (STREAMLIT CLOUD / PANDOC) ===========
-# Força o pypandoc a baixar o binário do Pandoc se não for encontrado.
-# Mantemos esta lógica, pois ela é o último recurso para garantir o Pandoc.
-# =========================================================================
-if 'pandoc_checked' not in st.session_state:
-    st.session_state['pandoc_checked'] = False
-
-if not st.session_state['pandoc_checked']:
-    try:
-        pypandoc.get_pandoc_path()
-        st.session_state['pandoc_checked'] = True
-    except Exception:
-        # Se não encontrar, tenta baixar o binário localmente
-        st.warning("Pandoc não encontrado no PATH. Tentando download automático do binário (processo único, pode levar alguns segundos).")
-        try:
-            pypandoc.download_pandoc()
-            st.session_state['pandoc_checked'] = True
-            st.success("Pandoc configurado com sucesso! Clique no botão 'GERAR DOCUMENTO FINAL' novamente.")
-        except Exception as download_e:
-            st.error(f"Falha ao baixar Pandoc automaticamente. Erro: {download_e}")
-
-
-# --- FUNÇÃO AUXILIAR: Inserir DOCX no Placeholder (Restaurada) ---
+# --- FUNÇÃO AUXILIAR: Inserir DOCX no Placeholder (Mantida) ---
 def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
     """Substitui marcador por outro documento DOCX (mantendo a ordem correta)."""
     insert_doc = Document(insert_doc_path)
@@ -49,7 +26,7 @@ def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_
 def generate_document(input_data):
     temp_paths = {}
     
-    # === A) Preparar Caminhos Temporários para Imagens e MDs ===
+    # === A) Preparar Caminhos Temporários para Imagens e PDFs ===
     
     for key, uploaded_file in input_data['uploads'].items():
         if uploaded_file is not None:
@@ -71,10 +48,10 @@ def generate_document(input_data):
     final_docx_buffer = BytesIO() 
 
     try:
-        # 1. CONVERSÃO DE MD PARA DOCX (Restaurada)
-        # O pypandoc converte o Markdown para um arquivo DOCX temporário
-        pypandoc.convert_file(temp_paths['explic_demonstr_file'], 'docx', outputfile = TEMP_BASE_DOCX)
-        pypandoc.convert_file(temp_paths['carta_responsb_file'], 'docx', outputfile = TEMP_CART_DOCX)
+        # 1. CONVERSÃO DE PDF PARA DOCX (Usando parse em vez de Converter)
+        # Tenta a função parse simples, que pode contornar o erro 'Rect'
+        parse(temp_paths['explic_demonstr_file'], TEMP_BASE_DOCX)
+        parse(temp_paths['carta_responsb_file'], TEMP_CART_DOCX)
         
         doc = DocxTemplate(CAMINHO_TEMPLETE)
 
@@ -107,7 +84,7 @@ def generate_document(input_data):
 
         final_doc = Document(TEMP_RENDERED)
 
-        # 3. INSERÇÃO DOS DOCX (gerados pelo Pandoc)
+        # 3. INSERÇÃO DOS DOCX (convertidos pelo pdf2docx)
         insert_docx_at_placeholder(final_doc, '[[EXP_DEMONSTR]]', TEMP_BASE_DOCX)
         insert_docx_at_placeholder(final_doc, '[[CARTA_RESP]]', TEMP_CART_DOCX)
 
@@ -118,11 +95,12 @@ def generate_document(input_data):
         return final_docx_buffer.getvalue(), None
 
     except Exception as e:
-        # Tratamento de erro detalhado para deploy
+        # Tratamento de erro detalhado
         if "No such file or directory" in str(e) and CAMINHO_TEMPLETE in str(e):
             return None, f"Erro: O template DOCX '{CAMINHO_TEMPLETE}' não foi encontrado no repositório. Certifique-se de que ele foi enviado ao GitHub."
-        if "No pandoc was found" in str(e):
-             return None, f"Erro: O Pandoc é necessário para converter Markdown. O download automático falhou. Erro detalhado: {e}"
+        # Alterado o tratamento de erro para refletir o uso de pdf2docx
+        if "'Rect' object has no attribute 'get_area'" in str(e):
+             return None, f"Erro na conversão de PDF. O arquivo PDF enviado tem um layout complexo (tabelas, caixas de texto) que a biblioteca 'pdf2docx' não conseguiu processar. Tente simplificar o PDF ou usar arquivos Markdown (.md)."
         
         return None, f"Erro durante a geração: {e}"
     
@@ -190,41 +168,40 @@ with tab3:
     with col6:
         input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["png", "jpg"], key='dre')
 
-    st.subheader("Arquivos de Texto (Markdown - Recomendado)")
+    st.subheader("Arquivos de Texto (PDF)")
     col7, col8 = st.columns(2)
     with col7:
-        # Tipo de arquivo ALTERADO para .md
-        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["md"], key='notas')
+        # Tipo de arquivo ALTERADO para .pdf
+        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["pdf"], key='notas')
     with col8:
-        # Tipo de arquivo ALTERADO para .md
-        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["md"], key='carta')
+        # Tipo de arquivo ALTERADO para .pdf
+        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["pdf"], key='carta')
 
 if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
     
-    if not st.session_state['pandoc_checked']:
-        st.warning("Aguarde a mensagem de sucesso do Pandoc e clique aqui novamente.")
-    else:
-        required_files = [
-            'balanco_pt1_file', 'balanco_pt2_file', 'demstr_result_file', 
-            'explic_demonstr_file', 'carta_responsb_file'
-        ]
+    # Removido st.session_state['pandoc_checked'] pois Pandoc foi removido
+
+    required_files = [
+        'balanco_pt1_file', 'balanco_pt2_file', 'demstr_result_file', 
+        'explic_demonstr_file', 'carta_responsb_file'
+    ]
+    
+    all_files_uploaded = all(input_data['uploads'][f] is not None for f in required_files)
+    
+    if all_files_uploaded:
+        with st.spinner("Gerando documento... Isso pode levar alguns segundos."):
+            file_data, error = generate_document(input_data)
         
-        all_files_uploaded = all(input_data['uploads'][f] is not None for f in required_files)
-        
-        if all_files_uploaded:
-            with st.spinner("Gerando documento... Isso pode levar alguns segundos."):
-                file_data, error = generate_document(input_data)
-            
-            if file_data:
-                st.success("Documento gerado com sucesso!")
-                st.download_button(
-                    label="Clique para Baixar Document.docx",
-                    data=file_data,
-                    file_name=f"Dossie_Contabil_{input_data['nome_empresa']}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-            else:
-                st.error(f"Falha na geração do documento. Detalhes: {error}")
-                
+        if file_data:
+            st.success("Documento gerado com sucesso!")
+            st.download_button(
+                label="Clique para Baixar Document.docx",
+                data=file_data,
+                file_name=f"Dossie_Contabil_{input_data['nome_empresa']}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
         else:
-            st.warning("Por favor, faça o upload de todos os 5 arquivos antes de gerar.")
+            st.error(f"Falha na geração do documento. Detalhes: {error}")
+            
+    else:
+        st.warning("Por favor, faça o upload de todos os 5 arquivos antes de gerar.")
