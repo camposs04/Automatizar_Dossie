@@ -7,8 +7,14 @@ from docx.shared import Inches
 import pypandoc
 from io import BytesIO
 
-# --- 1. Mover a Lógica de Geração para uma Função ---
-
+def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
+    insert_doc = Document(insert_doc_path)
+    for paragraph in main_doc.paragraphs:
+        if placeholder in paragraph.text:
+            paragraph.text = paragraph.text.replace(placeholder, "")
+            for element in reversed(insert_doc.element.body):
+                paragraph._element.addnext(element)
+            return True
 
 def generate_document(input_data):
     temp_paths = {}
@@ -69,15 +75,6 @@ def generate_document(input_data):
         doc.save(TEMP_RENDERED)
 
         final_doc = Document(TEMP_RENDERED)
-        
-        def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
-            insert_doc = Document(insert_doc_path)
-            for paragraph in main_doc.paragraphs:
-                if placeholder in paragraph.text:
-                    paragraph.text = paragraph.text.replace(placeholder, "")
-                    for element in reversed(insert_doc.element.body):
-                        paragraph._element.addnext(element)
-                    return True
 
         insert_docx_at_placeholder(final_doc, '[[EXP_DEMONSTR]]', TEMP_BASE_DOCX)
         insert_docx_at_placeholder(final_doc, '[[CARTA_RESP]]', TEMP_CART_DOCX)
@@ -110,7 +107,7 @@ st.set_page_config(page_title="Gerador de Demonstrações Contábeis", layout="w
 st.title("📄 Gerador Automático de Documentos Contábeis")
 st.markdown("Preencha os campos e faça o upload dos arquivos para gerar o dossiê final.")
 
-tab1, tab2, tab3 = st.tabs(["Dados da Empresa/Períodos", "Dados dos Administradores", "Upload de Arquivos"])
+tab1, tab2, tab3 = st.tabs(["Dados da Empresa/Períodos", "Dados dos Sócios", "Upload de Arquivos"])
 
 input_data = {}
 
@@ -124,11 +121,11 @@ with tab1:
 
     with col2:
         input_data['periodo_anual'] = st.text_input("Período Anual (Descrição)", value="Junho a Agosto 2030")
-        input_data['data_dem_encerradas'] = st.text_input("Data das Demos. Encerradas", value="07/02/2005", help="Formato: DD/MM/AAAA")
+        input_data['data_dem_encerradas'] = st.text_input("Demonstrações Contábeis Encerradas em", value="07/02/2005", help="Formato: DD/MM/AAAA")
         input_data['periodo_em_data'] = st.text_input("Período de Referência", value="07 a 12/2030")
 
 with tab2:
-    st.subheader("Dados dos Administradores")
+    st.subheader("Dados dos Sócios")
     col3, col4 = st.columns(2)
     
     with col3:
@@ -162,7 +159,7 @@ with tab3:
 
 
 
-if st.button("✅ GERAR DOCUMENTO FINAL"):
+if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
     required_files = [
         'balanco_pt1_file', 'balanco_pt2_file', 'demstr_result_file', 
         'explic_demonstr_file', 'carta_responsb_file'
