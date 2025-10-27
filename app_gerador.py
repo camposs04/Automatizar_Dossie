@@ -6,26 +6,7 @@ from docx import Document
 from docx.shared import Inches
 import pypandoc
 from io import BytesIO
-
-if 'pandoc_checked' not in st.session_state:
-    st.session_state['pandoc_checked'] = False
-
-if not st.session_state['pandoc_checked']:
-    try:
-        # Tenta encontrar o Pandoc no ambiente
-        pypandoc.get_pandoc_path()
-        st.session_state['pandoc_checked'] = True
-    except Exception:
-        # Se não encontrar (erro de deploy), tenta baixar o binário localmente
-        st.warning("Pandoc não encontrado no PATH. Tentando download automático do binário (processo único, pode levar alguns segundos).")
-        try:
-            # Força o download
-            pypandoc.download_pandoc()
-            st.session_state['pandoc_checked'] = True
-            st.success("Pandoc configurado com sucesso! Clique no botão 'GERAR DOCUMENTO FINAL' novamente.")
-        except Exception as download_e:
-            # Se o download falhar, exibe o erro e permite a repetição
-            st.error(f"Falha ao baixar Pandoc automaticamente. Erro: {download_e}")
+from pdf2docx import Converter
 
 def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
     insert_doc = Document(insert_doc_path)
@@ -61,8 +42,13 @@ def generate_document(input_data):
     final_docx_buffer = BytesIO() 
 
     try:
-        pypandoc.convert_file(temp_paths['explic_demonstr_file'], 'docx', outputfile = TEMP_BASE_DOCX)
-        pypandoc.convert_file(temp_paths['carta_responsb_file'], 'docx', outputfile = TEMP_CART_DOCX)
+        conv1 = Converter(temp_paths['explic_demonstr_file'])
+        conv1.convert(TEMP_BASE_DOCX, start=0, end=None)
+        conv1.close()
+
+        conv2 = Converter(temp_paths['carta_responsb_file'])
+        conv2.convert(TEMP_CART_DOCX, start=0, end=None)
+        conv2.close()
         
         doc = DocxTemplate(CAMINHO_TEMPLETE)
 
@@ -175,12 +161,12 @@ with tab3:
     with col6:
         input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["png", "jpg"], key='dre')
 
-    st.subheader("Arquivos de Texto (Markdown)")
+    st.subheader("Arquivos de Texto (PDF)")
     col7, col8 = st.columns(2)
     with col7:
-        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["md"], key='notas')
+        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["pdf"], key='notas')
     with col8:
-        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["md"], key='carta')
+        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["pdf"], key='carta')
 
 
 
