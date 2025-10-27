@@ -153,12 +153,12 @@ with tab3:
     with col6:
         input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["png", "jpg"], key='dre')
 
-    st.subheader("Arquivos de Texto (PDF)")
+    st.subheader("Arquivos de Texto (WORD)")
     col7, col8 = st.columns(2)
     with col7:
-        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["pdf"], key='notas')
+        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["docx"], key='notas')
     with col8:
-        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["pdf"], key='carta')
+        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["docx"], key='carta')
 
 if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
     required_files = [
