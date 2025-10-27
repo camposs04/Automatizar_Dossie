@@ -150,8 +150,8 @@ with tab3:
     col5, col6 = st.columns(2)
     
     with col5:
-        input_data['uploads']['balanco_pt1_file'] = st.file_uploader("Balanco Patrimonial (Parte 1)", type=["png", "jpg"], key='balanco_1')
-        input_data['uploads']['balanco_pt2_file'] = st.file_uploader("Balanco Patrimonial (Parte 2)", type=["png", "jpg"], key='balanco_2')
+        input_data['uploads']['balanco_pt1_file'] = st.file_uploader("Balanco Patrimonial (Ativo)", type=["png", "jpg"], key='balanco_1')
+        input_data['uploads']['balanco_pt2_file'] = st.file_uploader("Balanco Patrimonial (Passivo)", type=["png", "jpg"], key='balanco_2')
     with col6:
         input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["png", "jpg"], key='dre')
 
