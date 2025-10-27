@@ -6,6 +6,7 @@ from docx import Document
 from docx.shared import Inches
 from io import BytesIO
 import traceback
+import fitz
 
 def pdf_to_images(pdf_path):
     images = []
