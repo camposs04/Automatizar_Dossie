@@ -5,7 +5,6 @@ from docxtpl import DocxTemplate, InlineImage
 from docx import Document
 from docx.shared import Inches
 from io import BytesIO
-import traceback
 import fitz
 
 def pdf_to_images(pdf_path):
@@ -66,7 +65,6 @@ def generate_document(input_data):
 
         balanco_pt1_img = InlineImage(doc, temp_paths['balanco_pt1_file'], width=Inches(6))
         balanco_pt2_img = InlineImage(doc, temp_paths['balanco_pt2_file'], width=Inches(6))
-        #demstr_result_img = InlineImage(doc, temp_paths['demstr_result_file'], width=Inches(6))
 
         context = {
             'nome_empresa': input_data['nome_empresa'],
@@ -78,12 +76,7 @@ def generate_document(input_data):
             'balanco_patrimonial_pt1': balanco_pt1_img,
             'balanco_patrimonial_pt2': balanco_pt2_img,
             'demontr_resultado': '[[DEMONSTR_RESULTADO]]',
-            'nome_socio1': input_data['nome_socio1'],
-            'nome_socio2': input_data['nome_socio2'],
-            'cargo_socio1': input_data['cargo_socio1'],
-            'cargo_socio2': input_data['cargo_socio2'],
-            'cpf_socio1': input_data['cpf_socio1'],
-            'cpf_socio2': input_data['cpf_socio2'],
+            'socios': input_data['socios'],
             'explic_demonstr': '[[EXP_DEMONSTR]]', 
             'carta_responsb': '[[CARTA_RESP]]'
         }
@@ -149,17 +142,22 @@ with tab1:
 
 with tab2:
     st.subheader("Dados dos Sócios")
-    col3, col4 = st.columns(2)
-    
-    with col3:
-        input_data['nome_socio1'] = st.text_input("Nome do Sócio 1", value="Nome TesTE 1")
-        input_data['cargo_socio1'] = st.text_input("Cargo do Sócio 1", value = "Cargo Teste 1")
-        input_data['cpf_socio1'] = st.text_input("CPF do Sócio 1", value="089.038.947-98")
-    
-    with col4:
-        input_data['nome_socio2'] = st.text_input("Nome do Sócio 2", value="Nome TesTE 2")
-        input_data['cargo_socio2'] = st.text_input("Cargo do Sócio 2", value = "Cargo Teste 2")
-        input_data['cpf_socio2'] = st.text_input("CPF do Sócio 2", value="089.128.947-97")
+    if "socios" not in st.session_state:
+        st.session_state.socios = [{"nome": "", "cpf": "", "cargo": ""}]
+
+    for i, socio in enumerate(st.session_state.socios):
+        st.write(f"--- Sócio {i+1} ---")
+        socio["nome"] = st.text_input(f"Nome do Sócio {i+1}", value=socio["nome"], key=f"nome_{i}")
+        socio["cpf"] = st.text_input(f"CPF do Sócio {i+1}", value=socio["cpf"], key=f"cpf_{i}")
+        socio["cargo"] = st.text_input(f"Cargo do Sócio {i+1}", value=socio["cargo"], key=f"cargo_{i}")
+        if st.button(f"Remover Sócio {i+1}", key=f"remove_{i}"):
+            st.session_state.socios.pop(i)
+            st.experimental_rerun()
+
+    if st.button("➕ Adicionar Sócio"):
+        st.session_state.socios.append({"nome": "", "cpf": "", "cargo": ""})
+
+input_data["socios"] = st.session_state.socios
 
 input_data['uploads'] = {}
 
