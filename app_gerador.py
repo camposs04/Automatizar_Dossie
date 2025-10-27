@@ -29,8 +29,7 @@ def generate_document(input_data):
                 tmp_file.write(uploaded_file.getvalue())
                 temp_paths[key] = tmp_file.name
         else:
-            st.error(f"O arquivo {key} é obrigatório!")
-            return None, None
+            return None, f"O arquivo {key} é obrigatório!"
     
     # === B) Definir os Caminhos Finais para a Lógica de Geração ===
     CAMINHO_TEMPLETE = "templete_base_ofc.docx"
@@ -85,6 +84,11 @@ def generate_document(input_data):
         return final_docx_buffer.getvalue(), None
 
     except Exception as e:
+        if "No such file or directory" in str(e) and CAMINHO_TEMPLETE in str(e):
+            return None, f"Erro: O template DOCX '{CAMINHO_TEMPLETE}' não foi encontrado no repositório. Certifique-se de que ele foi enviado ao GitHub."
+        if "No pandoc was found" in str(e):
+             return None, f"Erro: O Pandoc é necessário para converter Markdown. Por favor, instale o Pandoc no ambiente ou use uma solução de deploy que o inclua. Erro detalhado: {e}"
+        
         return None, f"Erro durante a geração: {e}"
     
     finally:
@@ -99,6 +103,7 @@ def generate_document(input_data):
             try:
                 os.remove(temp_file)
             except Exception:
+                pass
 
 
 # --- 2. Interface Streamlit ---
