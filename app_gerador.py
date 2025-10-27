@@ -5,7 +5,26 @@ from docxtpl import DocxTemplate, InlineImage
 from docx import Document
 from docx.shared import Inches
 from io import BytesIO
+import traceback
 
+def pdf_to_images(pdf_path):
+    images = []
+    doc = fitz.open(pdf_path)
+    for page in doc:
+        pix = page.get_pixmap(dpi=200)
+        img_bytes = pix.tobytes("png")
+        images.append(img_bytes)
+    return images
+
+def insert_pdf_at_placeholder(main_doc, placeholder, pdf_path):
+    images = pdf_to_images(pdf_path)
+    for paragraph in main_doc.paragraphs:
+        if placeholder in paragraph.text:
+            paragraph.text = paragraph.text.replace(placeholder, "")
+            for img in images:
+                run = paragraph.add_run()
+                run.add_picture(BytesIO(img), width=Inches(6))
+            return True
 
 def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
     insert_doc = Document(insert_doc_path)
@@ -46,7 +65,7 @@ def generate_document(input_data):
 
         balanco_pt1_img = InlineImage(doc, temp_paths['balanco_pt1_file'], width=Inches(6))
         balanco_pt2_img = InlineImage(doc, temp_paths['balanco_pt2_file'], width=Inches(6))
-        demstr_result_img = InlineImage(doc, temp_paths['demstr_result_file'], width=Inches(6))
+        #demstr_result_img = InlineImage(doc, temp_paths['demstr_result_file'], width=Inches(6))
 
         context = {
             'nome_empresa': input_data['nome_empresa'],
@@ -57,7 +76,7 @@ def generate_document(input_data):
             'periodo_em_data': input_data['periodo_em_data'],
             'balanco_patrimonial_pt1': balanco_pt1_img,
             'balanco_patrimonial_pt2': balanco_pt2_img,
-            'demontr_resultado': demstr_result_img,
+            'demontr_resultado': '[[DEMONSTR_RESULTADO]]',
             'nome_socio1': input_data['nome_socio1'],
             'nome_socio2': input_data['nome_socio2'],
             'cargo_socio1': input_data['cargo_socio1'],
@@ -72,7 +91,7 @@ def generate_document(input_data):
         doc.save(TEMP_RENDERED)
 
         final_doc = Document(TEMP_RENDERED)
-
+        insert_pdf_at_placeholder(final_doc, '[[DEMONSTR_RESULTADO]]', temp_paths['demstr_result_file'])
         insert_docx_at_placeholder(final_doc, '[[EXP_DEMONSTR]]', temp_paths['explic_demonstr_file'])
         insert_docx_at_placeholder(final_doc, '[[CARTA_RESP]]', temp_paths['carta_responsb_file'])
 
@@ -151,7 +170,7 @@ with tab3:
         input_data['uploads']['balanco_pt1_file'] = st.file_uploader("Balanco Patrimonial (Ativo)", type=["png", "jpg"], key='balanco_1')
         input_data['uploads']['balanco_pt2_file'] = st.file_uploader("Balanco Patrimonial (Passivo)", type=["png", "jpg"], key='balanco_2')
     with col6:
-        input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["png", "jpg"], key='dre')
+        input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["pdf"])
 
     st.subheader("Arquivos de Texto (WORD)")
     col7, col8 = st.columns(2)
