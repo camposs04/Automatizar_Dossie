@@ -1,160 +1,170 @@
-📄 Gerador Automatizado de Dossiês Contábeis
+# 📄 Gerador Automatizado de Dossiês Contábeis
 
-Este projeto fornece uma interface web simples e eficaz para automatizar a geração de dossiês contábeis em formato DOCX, combinando dados variáveis de texto, uploads de imagens e conteúdos Markdown. Utiliza as bibliotecas Python docxtpl e python-docx para renderização e o Streamlit para a interface.
+🚀 **Automatize a geração de documentos contábeis em segundos!**
+Este projeto oferece uma interface web simples e poderosa para criar **dossiês contábeis completos (DOCX)** — combinando dados dinâmicos, imagens e arquivos Markdown.
 
-1. Visão Geral do Projeto
+🧩 Baseado em **Python**, **Streamlit**, **docxtpl** e **python-docx**.
 
-O objetivo principal é simplificar o processo de criação de documentos financeiros padronizados. O sistema permite que o usuário insira informações da empresa, dados de sócios/administradores, e faça o upload de representações visuais (balanços, DREs) e documentos complementares (Notas Explicativas, Carta de Responsabilidade) para gerar um documento final pronto para uso.
+---
 
-Tecnologias Utilizadas:
+## 🧠 1. Visão Geral
 
-Python: Linguagem de programação principal.
+O objetivo é **simplificar e padronizar a criação de documentos financeiros**, permitindo que o usuário:
 
-Streamlit: Para a interface web de entrada de dados.
+* insira informações da empresa e dos sócios/administradores,
+* envie imagens de balanços e demonstrações de resultados,
+* e anexe documentos complementares (Notas Explicativas e Carta de Responsabilidade).
 
-DocxTemplate (docxtpl): Para preencher o template DOCX com dados e imagens.
+No final, o sistema gera **um arquivo DOCX pronto para uso profissional** 📘
 
-python-docx: Para manipulação avançada e inserção de conteúdo dinâmico (Markdown convertido).
+---
 
-pypandoc: Para converter arquivos Markdown (.md) em formato DOCX.
+## ⚙️ Tecnologias Utilizadas
 
-2. Pré-requisitos
+| Tecnologia                    | Função Principal                             |
+| ----------------------------- | -------------------------------------------- |
+| 🐍 **Python**                 | Linguagem principal do projeto               |
+| 🌐 **Streamlit**              | Interface web para entrada de dados          |
+| 🧾 **docxtpl (DocxTemplate)** | Renderização dinâmica do template DOCX       |
+| 📄 **python-docx**            | Manipulação avançada de documentos DOCX      |
+| 🔄 **pypandoc**               | Conversão de arquivos Markdown (.md) em DOCX |
 
-Para executar este projeto, você precisará ter instalado:
+---
 
-Python 3.7+
+## 🧩 2. Pré-requisitos
 
-Pip (gerenciador de pacotes do Python)
+Antes de rodar o projeto, instale:
 
-Pandoc: Ferramenta de conversão de documentos necessária para que o pypandoc funcione.
+* **Python 3.7+**
+* **pip** (gerenciador de pacotes)
+* **Pandoc** → necessário para o `pypandoc` funcionar corretamente
 
-Instalação do Pandoc: Siga as instruções oficiais em [https://pandoc.org/installing.html]. No Linux/Debian, geralmente é sudo apt-get install pandoc.
+📥 **Instalação do Pandoc:**
 
-3. Configuração e Instalação
+```bash
+sudo apt-get install pandoc
+```
 
-A. Instalação de Dependências
+ou siga o guia oficial: [https://pandoc.org/installing.html](https://pandoc.org/installing.html)
 
-No seu terminal, dentro do ambiente virtual do projeto, execute:
+---
 
+## 🧰 3. Instalação e Configuração
+
+### A. Instalar dependências
+
+Dentro do seu ambiente virtual, execute:
+
+```bash
 pip install streamlit docxtpl python-docx pypandoc
+```
 
+### B. Estrutura de diretórios esperada
 
-B. Estrutura de Arquivos
-
-Certifique-se de que a estrutura de arquivos do seu projeto esteja configurada corretamente. O arquivo principal app_gerador.py e o template base devem estar acessíveis:
-
+```
 /seu_diretorio_projeto
-├── app_gerador.py        # O script Streamlit com toda a lógica
-└── templete_base_ofc.docx # O template DOCX com os marcadores Jinja2
+├── app_gerador.py           # Script principal do Streamlit
+└── templete_base_ofc.docx   # Template DOCX com marcadores Jinja2
+```
 
+> 💡 Se o template estiver em um caminho fixo (ex: `/home/camposs/Desktop/estagio/desafio/`), garanta que ele seja acessível ao servidor Streamlit.
 
-Observação: Se o templete_base_ofc.docx estiver em outro caminho fixo, como /home/camposs/Desktop/estagio/desafio/, certifique-se de que este caminho está acessível pelo servidor que roda o Streamlit.
+---
 
-4. Instruções de Uso
+## 🖥️ 4. Instruções de Uso
 
-A. Executando a Aplicação
+### 🏃‍♀️ A. Executando a aplicação
 
-Para iniciar a interface web, navegue até o diretório do projeto no terminal e execute:
+No terminal, rode:
 
+```bash
 streamlit run app_gerador.py
+```
 
+Isso abrirá automaticamente o app no navegador → [http://localhost:8501](http://localhost:8501)
 
-O Streamlit iniciará um servidor local e abrirá automaticamente a aplicação no seu navegador padrão (geralmente em http://localhost:8501).
+---
 
-B. Guia da Interface (Três Abas)
+### 🧭 B. Guia da Interface
 
-A interface é dividida em três abas principais para organizar a entrada dos dados:
+A interface é organizada em **3 abas** principais:
 
-Aba 1: Dados da Empresa/Períodos
+#### 📁 Aba 1 — Dados da Empresa e Período
 
-Preencha os campos de texto que serão mapeados diretamente para o template, incluindo:
+Campos:
 
-Nome Fantasia
+* Nome Fantasia
+* Razão Social
+* CNPJ
+* Período Anual
+* Datas de Encerramento e Referência
 
-Razão Social
+#### 👥 Aba 2 — Dados dos Administradores
 
-CNPJ (formato sugerido)
+Campos:
 
-Período Anual (descrição)
+* Nome completo
+* Cargo (novo campo adicionado)
+* CPF
 
-Datas de Encerramento e Referência
+#### 📎 Aba 3 — Upload de Arquivos
 
-Aba 2: Dados dos Administradores
+Uploads obrigatórios (5 arquivos):
 
-Preencha os dados dos dois sócios/administradores:
+| Tipo        | Nome no Sistema                 | Formato          | Inserção no DOCX             |
+| ----------- | ------------------------------- | ---------------- | ---------------------------- |
+| 📊 Imagem   | Balanço Patrimonial (Parte 1)   | `.png` ou `.jpg` | InlineImage                  |
+| 📊 Imagem   | Balanço Patrimonial (Parte 2)   | `.png` ou `.jpg` | InlineImage                  |
+| 📈 Imagem   | Demonstração do Resultado (DRE) | `.png` ou `.jpg` | InlineImage                  |
+| 📘 Markdown | Notas Explicativas              | `.md`            | Substitui `[[EXP_DEMONSTR]]` |
+| 📘 Markdown | Carta de Responsabilidade       | `.md`            | Substitui `[[CARTA_RESP]]`   |
 
-Nome completo
+---
 
-Cargo (Este é um novo campo adicionado ao template)
+### 🧾 C. Geração e Download
 
-CPF (formato sugerido)
+Após preencher tudo, clique em:
 
-Aba 3: Upload de Arquivos
-
-Esta é a seção mais crucial. Você deve fazer o upload de cinco (5) arquivos obrigatórios que serão incorporados ao documento final:
-
-Tipo de Conteúdo
-
-Nome do Campo
-
-Formato Esperado
-
-Uso no Documento
-
-Imagens
-
-Balanço Patrimonial (Parte 1)
-
-PNG ou JPG
-
-Inserido como InlineImage
-
-Imagens
-
-Balanço Patrimonial (Parte 2)
-
-PNG ou JPG
-
-Inserido como InlineImage
-
-Imagens
-
-Demonstração do Resultado (DRE)
-
-PNG ou JPG
-
-Inserido como InlineImage
-
-Conteúdo
-
-Notas Explicativas
-
-Arquivo Markdown (.md)
-
-Convertido para DOCX e substituído no marcador [[EXP_DEMONSTR]]
-
-Conteúdo
-
-Carta de Responsabilidade
-
-Arquivo Markdown (.md)
-
-Convertido para DOCX e substituído no marcador [[CARTA_RESP]]
-
-C. Geração e Download
-
-Após preencher todos os campos e fazer o upload de todos os 5 arquivos, clique no botão:
-
+```
 ✅ GERAR DOCUMENTO FINAL
+```
 
-O Streamlit exibirá uma mensagem de "Gerando documento..." enquanto o Python salva os uploads, executa o pypandoc, renderiza o template docxtpl, e realiza a substituição dos blocos DOCX.
+O Streamlit exibirá uma mensagem de carregamento enquanto o Python:
 
-Em caso de sucesso, será exibido um botão de Download com o nome do arquivo personalizado (ex: Dossie_Contabil_TESTE do Nome.docx).
+1. Salva os arquivos temporários
+2. Converte `.md → .docx` via `pypandoc`
+3. Renderiza o template `docxtpl`
+4. Substitui os blocos via `python-docx`
 
-Em caso de erro (ex: falha no pypandoc por falta do Pandoc, ou arquivo de template não encontrado), uma mensagem de erro será exibida.
+📦 Resultado:
+Um arquivo como
 
-5. Notas Técnicas sobre o Código
+```
+Dossie_Contabil_<NOME_EMPRESA>.docx
+```
 
-Arquivos Temporários: A função generate_document utiliza o módulo tempfile para salvar temporariamente todos os arquivos de upload e os documentos intermediários gerados pelo pypandoc. Isso garante que o disco do servidor seja limpo após cada geração (bloco finally).
+pronto para download direto da interface.
 
-Substituição de Conteúdo: O projeto usa uma abordagem híbrida: docxtpl para variáveis simples e imagens, e python-docx (função insert_docx_at_placeholder) para incorporar documentos DOCX completos (Notas e Carta) no lugar de marcadores de texto ([[MARCADOR]]), preservando formatação complexa.
+---
+
+## 🧑‍💻 5. Notas Técnicas
+
+### 🔹 Arquivos Temporários
+
+O script usa o módulo `tempfile` para armazenar temporariamente todos os uploads e conversões, garantindo limpeza automática no final da execução.
+
+### 🔹 Substituição de Conteúdo
+
+O projeto combina:
+
+* **docxtpl** → para variáveis simples e imagens
+* **python-docx** → para inserir documentos inteiros (Notas/Carta) nos marcadores
+
+Isso mantém a **formatação completa dos blocos Markdown** ao incorporar no DOCX final.
+
+---
+
+## 📜 Licença
+
+Este projeto é distribuído sob a licença MIT.
+Sinta-se à vontade para usar, adaptar e contribuir! 🤝
