@@ -5,10 +5,10 @@ from docxtpl import DocxTemplate, InlineImage
 from docx import Document
 from docx.shared import Inches
 from io import BytesIO
-# Revertendo a importação para a biblioteca de conversão de PDF
-from pdf2docx import parse 
+# REMOVIDA: Remoção da importação pdf2docx (não é mais necessária)
+# from pdf2docx import parse 
 
-# --- FUNÇÃO AUXILIAR: Inserir DOCX no Placeholder (Mantida) ---
+# --- FUNÇÃO AUXILIAR: Inserir DOCX no Placeholder (Mantida, pois agora recebe DOCX diretamente) ---
 def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
     """Substitui marcador por outro documento DOCX (mantendo a ordem correta)."""
     insert_doc = Document(insert_doc_path)
@@ -26,7 +26,7 @@ def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_
 def generate_document(input_data):
     temp_paths = {}
     
-    # === A) Preparar Caminhos Temporários para Imagens e PDFs ===
+    # === A) Preparar Caminhos Temporários para Imagens e DOCX ===
     
     for key, uploaded_file in input_data['uploads'].items():
         if uploaded_file is not None:
@@ -41,17 +41,15 @@ def generate_document(input_data):
     # === B) Definir os Caminhos Finais para a Lógica de Geração ===
     CAMINHO_TEMPLETE = "templete_base_ofc.docx"
     
-    TEMP_BASE_DOCX = os.path.join(tempfile.gettempdir(), "temporario_base.docx")
-    TEMP_CART_DOCX = os.path.join(tempfile.gettempdir(), "temp_cart.docx")
+    # Os caminhos TEMP_BASE_DOCX e TEMP_CART_DOCX foram removidos, 
+    # pois agora usamos os caminhos dos arquivos temporários originais (temp_paths)
     TEMP_RENDERED = os.path.join(tempfile.gettempdir(), "temp_rendered.docx")
     
     final_docx_buffer = BytesIO() 
 
     try:
-        # 1. CONVERSÃO DE PDF PARA DOCX (Usando parse em vez de Converter)
-        # Tenta a função parse simples, que pode contornar o erro 'Rect'
-        parse(temp_paths['explic_demonstr_file'], TEMP_BASE_DOCX)
-        parse(temp_paths['carta_responsb_file'], TEMP_CART_DOCX)
+        # REMOVIDA: Toda a lógica de conversão de PDF para DOCX foi eliminada.
+        # Os arquivos já estão em DOCX (temp_paths['explic_demonstr_file'] etc.)
         
         doc = DocxTemplate(CAMINHO_TEMPLETE)
 
@@ -84,9 +82,13 @@ def generate_document(input_data):
 
         final_doc = Document(TEMP_RENDERED)
 
-        # 3. INSERÇÃO DOS DOCX (convertidos pelo pdf2docx)
-        insert_docx_at_placeholder(final_doc, '[[EXP_DEMONSTR]]', TEMP_BASE_DOCX)
-        insert_docx_at_placeholder(final_doc, '[[CARTA_RESP]]', TEMP_CART_DOCX)
+        # 3. INSERÇÃO DOS DOCX (diretamente do arquivo de upload)
+        
+        # Agora o caminho aponta para o arquivo DOCX temporário do upload
+        insert_docx_at_placeholder(final_doc, '[[EXP_DEMONSTR]]', temp_paths['explic_demonstr_file'])
+        insert_docx_at_placeholder(final_doc, '[[CARTA_RESP]]', temp_paths['carta_responsb_file'])
+        
+        # FIM DA CORREÇÃO
 
 
         final_doc.save(final_docx_buffer)
@@ -95,18 +97,19 @@ def generate_document(input_data):
         return final_docx_buffer.getvalue(), None
 
     except Exception as e:
-        # Tratamento de erro detalhado
+        # Tratamento de erro detalhado simplificado (sem erros de conversão de PDF)
         if "No such file or directory" in str(e) and CAMINHO_TEMPLETE in str(e):
             return None, f"Erro: O template DOCX '{CAMINHO_TEMPLETE}' não foi encontrado no repositório. Certifique-se de que ele foi enviado ao GitHub."
-        # Alterado o tratamento de erro para refletir o uso de pdf2docx
-        if "'Rect' object has no attribute 'get_area'" in str(e):
-             return None, f"Erro na conversão de PDF. O arquivo PDF enviado tem um layout complexo (tabelas, caixas de texto) que a biblioteca 'pdf2docx' não conseguiu processar. Tente simplificar o PDF ou usar arquivos Markdown (.md)."
+        
+        if "Package not found" in str(e):
+             return None, f"Erro ao abrir o documento DOCX de upload. Verifique se o arquivo '{CAMINHO_TEMPLETE}' ou os arquivos de upload .docx não estão corrompidos. Erro detalhado: {e}"
         
         return None, f"Erro durante a geração: {e}"
     
     finally:
+        # A lista de limpeza de arquivos temporários foi simplificada
         temp_files_to_clean = [
-            TEMP_BASE_DOCX, TEMP_CART_DOCX, TEMP_RENDERED, 
+            TEMP_RENDERED, 
             temp_paths.get('balanco_pt1_file'), temp_paths.get('balanco_pt2_file'), 
             temp_paths.get('demstr_result_file'), temp_paths.get('explic_demonstr_file'), 
             temp_paths.get('carta_responsb_file')
@@ -168,19 +171,17 @@ with tab3:
     with col6:
         input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["png", "jpg"], key='dre')
 
-    st.subheader("Arquivos de Texto (PDF)")
+    st.subheader("Documentos de Texto (DOCX - Recomendado)") # Título atualizado
     col7, col8 = st.columns(2)
     with col7:
-        # Tipo de arquivo ALTERADO para .pdf
-        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["pdf"], key='notas')
+        # Tipo de arquivo ALTERADO para .docx
+        input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["docx"], key='notas')
     with col8:
-        # Tipo de arquivo ALTERADO para .pdf
-        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["pdf"], key='carta')
+        # Tipo de arquivo ALTERADO para .docx
+        input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["docx"], key='carta')
 
 if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
     
-    # Removido st.session_state['pandoc_checked'] pois Pandoc foi removido
-
     required_files = [
         'balanco_pt1_file', 'balanco_pt2_file', 'demstr_result_file', 
         'explic_demonstr_file', 'carta_responsb_file'
