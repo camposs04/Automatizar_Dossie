@@ -4,12 +4,35 @@ import tempfile
 from docxtpl import DocxTemplate, InlineImage
 from docx import Document
 from docx.shared import Inches
-import pypandoc
 from io import BytesIO
-from pdf2docx import Converter
+from pdf2docx import Converter, parse
+import fitz
+import traceback
 
-def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
-    insert_doc = Document(insert_doc_path)
+def pdf_to_docx_text(pdf_path, output_path):
+    doc = fitz.open(pdf_path)
+    word_doc = Document()
+
+    for page in doc:
+        blocks = page.get_text("dict")["blocks"]
+        for b in blocks:
+            if "lines" not in b:
+                continue
+            for line in b["lines"]:
+                paragraph_text = ""
+                for span in line["spans"]:
+                    text = span["text"]
+                    run = word_doc.add_paragraph().add_run(text)
+                    # Mantém negrito/itálico do PDF
+                    run.bold = span.get("flags", 0) & 2 != 0  # flag 2 = negrito
+                    run.italic = span.get("flags", 0) & 1 != 0  # flag 1 = itálico
+    word_doc.save(output_path)
+    return output_path
+
+def insert_pdf_as_text(main_doc: Document, placeholder: str, pdf_path: str):
+    temp_docx_path = pdf_path.replace(".pdf", "_tmp.docx")
+    pdf_to_docx_text(pdf_path, temp_docx_path)
+    insert_doc = Document(temp_docx_path)
     for paragraph in main_doc.paragraphs:
         if placeholder in paragraph.text:
             paragraph.text = paragraph.text.replace(placeholder, "")
@@ -81,8 +104,9 @@ def generate_document(input_data):
 
         final_doc = Document(TEMP_RENDERED)
 
-        insert_docx_at_placeholder(final_doc, '[[EXP_DEMONSTR]]', TEMP_BASE_DOCX)
-        insert_docx_at_placeholder(final_doc, '[[CARTA_RESP]]', TEMP_CART_DOCX)
+        insert_pdf_as_text(final_doc, '[[EXP_DEMONSTR]]', temp_paths['explic_demonstr_file'])
+        insert_pdf_as_text(final_doc, '[[CARTA_RESP]]', temp_paths['carta_responsb_file'])
+
 
         final_doc.save(final_docx_buffer)
         final_docx_buffer.seek(0)
@@ -167,8 +191,6 @@ with tab3:
         input_data['uploads']['explic_demonstr_file'] = st.file_uploader("Notas Explicativas", type=["pdf"], key='notas')
     with col8:
         input_data['uploads']['carta_responsb_file'] = st.file_uploader("Carta de Responsabilidade", type=["pdf"], key='carta')
-
-
 
 if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
     required_files = [
