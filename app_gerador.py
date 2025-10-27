@@ -7,6 +7,26 @@ from docx.shared import Inches
 import pypandoc
 from io import BytesIO
 
+if 'pandoc_checked' not in st.session_state:
+    st.session_state['pandoc_checked'] = False
+
+if not st.session_state['pandoc_checked']:
+    try:
+        # Tenta encontrar o Pandoc no ambiente
+        pypandoc.get_pandoc_path()
+        st.session_state['pandoc_checked'] = True
+    except Exception:
+        # Se não encontrar (erro de deploy), tenta baixar o binário localmente
+        st.warning("Pandoc não encontrado no PATH. Tentando download automático do binário (processo único, pode levar alguns segundos).")
+        try:
+            # Força o download
+            pypandoc.download_pandoc()
+            st.session_state['pandoc_checked'] = True
+            st.success("Pandoc configurado com sucesso! Clique no botão 'GERAR DOCUMENTO FINAL' novamente.")
+        except Exception as download_e:
+            # Se o download falhar, exibe o erro e permite a repetição
+            st.error(f"Falha ao baixar Pandoc automaticamente. Erro: {download_e}")
+
 def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_path: str):
     insert_doc = Document(insert_doc_path)
     for paragraph in main_doc.paragraphs:
