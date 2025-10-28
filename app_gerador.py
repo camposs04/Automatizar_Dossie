@@ -163,13 +163,6 @@ with tab1:
 
     with col2:
 
-        data_encerradas_dt = st.date_input(
-            "Demonstrações Contábeis Encerradas em", 
-            value=datetime.date(2005, 2, 7),
-            help="Selecione a data de encerramento das demonstrações. (Ex: 07/02/2005)"
-        )
-        input_data['data_dem_encerradas'] = data_encerradas_dt.strftime("%d/%m/%Y")
-
         st.markdown("##### Período de Referência Contábil")
 
         data_inicio_default = datetime.date(datetime.date.today().year, 1,1)
@@ -199,6 +192,8 @@ with tab1:
             periodo_anual_desc = f"{mes_desc_inicio} de {data_inicio.year} a {mes_desc_fim} de {data_fim.year}"
 
         input_data['periodo_anual'] = periodo_anual_desc
+
+        input_data['data_dem_encerradas'] = data_fim.strftime("%d/%m/%Y")
         
         st.markdown("---")
         st.markdown(f"**Período de Referência (periodo_em_data):** `{input_data['periodo_em_data']}`")
