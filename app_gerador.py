@@ -177,7 +177,7 @@ with tab1:
 
         data_inicio = st.date_input("Data de Início", value = data_inicio_default, key = 'data_inicio')
         data_fim = st.date_input("Data de Fim", value = data_fim_default, key = 'data_fim')
-        input_data['data_dem_encerradas'] = st.text_input("Demonstrações Contábeis Encerradas em", value="07/02/2005", help="Formato: DD/MM/AAAA")
+        #input_data['data_dem_encerradas'] = st.text_input("Demonstrações Contábeis Encerradas em", value="07/02/2005", help="Formato: DD/MM/AAAA")
         #input_data['periodo_em_data'] = st.text_input("Período de Referência", value="07 a 12/2030")
 
         mes_inicio_curto = str(data_inicio.month).zfill(2)
