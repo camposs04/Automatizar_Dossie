@@ -66,8 +66,12 @@ def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_
 
 def generate_document(input_data):
     temp_paths = {}
-    
-    # === A) Preparar Caminhos Temporários para Imagens ===
+
+    data_e_hora_atual = datetime.datetime.now()
+    dia = data_e_hora_atual.day
+    mes = meses_pt_longo[data_e_hora_atual.month]
+    ano = data_e_hora_atual.year
+    data_atual_formatada = f"{dia} de {mes} de {ano}"
     
     for key, uploaded_file in input_data['uploads'].items():
         if uploaded_file is not None:
@@ -98,6 +102,7 @@ def generate_document(input_data):
 
         context = {
             'nome_empresa': input_data['nome_empresa'],
+            'data_atual': data_atual_formatada,
             'periodo_anual': input_data['periodo_anual'],
             'cnpj_empresa': input_data['cnpj_empresa'],
             'data_dem_encerradas': input_data['data_dem_encerradas'],
