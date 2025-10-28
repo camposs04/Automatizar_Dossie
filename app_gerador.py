@@ -176,7 +176,7 @@ with tab1:
         input_data['razao_social_empresa'] = st.text_input("Razão Social", value="TESTE RAZAO EMPRESA LTDA SCP VTG")
 
         cnpj_input = st.text_input("CNPJ ", value= "23766826000161")
-        input_data['cnpj_empresa'] = clean_numbers(cnpj_input)
+        input_data['cnpj_empresa'] = format_cnpj(cnpj_input)
         st.markdown(f"**CNPJ Formatado:** `{format_cnpj(input_data['cnpj_empresa'])}`")
 
     with col2:
@@ -241,7 +241,7 @@ with tab2:
 
         cpf_input = f"cpf_input_{i}"
         cpf_value = st.text_input(f"CPF do Sócio {i+1}", value=clean_numbers(socio["cpf"]), key=cpf_input)
-        st.session_state.socios[i]["cpf"]= clean_numbers(cpf_value)
+        st.session_state.socios[i]["cpf"]= format_cpf(cpf_value)
 
         st.markdown(f"**CPF Formatado:** `{format_cpf(st.session_state.socios[i]['cpf'])}`")
         
