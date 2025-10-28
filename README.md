@@ -53,45 +53,48 @@ ou siga o guia oficial: [https://pandoc.org/installing.html](https://pandoc.org/
 
 ### A. Instalar dependências
 
-Dentro do seu ambiente virtual, execute:
-
 ```bash
 pip install streamlit docxtpl python-docx pypandoc
 ```
 
-### B. Estrutura de diretórios esperada
+### B. Estrutura de diretórios
 
 ```
 /seu_diretorio_projeto
-├── app_gerador.py           # Script principal do Streamlit
-└── templete_base_ofc.docx   # Template DOCX com marcadores Jinja2
+├── app_gerador.py
+└── templete_base_ofc.docx
 ```
-
-> 💡 Se o template estiver em um caminho fixo (ex: `/home/pasta1/desafio/`), garanta que ele seja acessível ao servidor Streamlit.
 
 ---
 
 ## 🖥️ 4. Instruções de Uso
 
-### 🏃‍♀️ A. Executando a aplicação
+### IMPORTANTE ⚠️
 
-No terminal, rode:
+Para o correto funcionamento da aplicação, o usuário **DEVE obrigatoriamente seguir os formatos exigidos para cada arquivo enviado**, conforme as especificações abaixo. **Arquivos fora do formato serão rejeitados.**
+
+Além disso, **é proibido incluir títulos** dentro dos arquivos:
+
+* **Notas Explicativas (.md)** → não deve conter título como "Notas Explicativas" no início
+* **Carta de Responsabilidade (.md)** → não deve conter título como "Carta de Responsabilidade" dentro do arquivo
+
+Os títulos já são gerados automaticamente pelo sistema no documento final.
+
+---
+
+### 🏃‍♀️ A. Executando a aplicação
 
 ```bash
 streamlit run app_gerador.py
 ```
 
-Isso abrirá automaticamente o app no navegador → [automatizardossie](https://automatizardossie.streamlit.app/)
-
 ---
 
 ### 🧭 B. Guia da Interface
 
-A interface é organizada em **3 abas** principais:
+A interface possui 3 abas:
 
 #### 📁 Aba 1 — Dados da Empresa e Período
-
-Campos:
 
 * Nome Fantasia
 * Razão Social
@@ -101,70 +104,35 @@ Campos:
 
 #### 👥 Aba 2 — Dados dos Administradores
 
-Campos:
-
 * Nome completo
-* Cargo (novo campo adicionado)
+* Cargo
 * CPF
 
 #### 📎 Aba 3 — Upload de Arquivos
 
-Uploads obrigatórios (5 arquivos):
-
-| Tipo        | Nome no Sistema                 | Formato          | Inserção no DOCX             |
-| ----------- | ------------------------------- | ---------------- | ---------------------------- |
-| 📊 Imagem   | Balanço Patrimonial (Parte 1)   | `.png` ou `.jpg` | InlineImage                  |
-| 📊 Imagem   | Balanço Patrimonial (Parte 2)   | `.png` ou `.jpg` | InlineImage                  |
-| 📈 Imagem   | Demonstração do Resultado (DRE) | `.png` ou `.jpg` | InlineImage                  |
-| 📘 Markdown | Notas Explicativas              | `.md`            | Substitui `[[EXP_DEMONSTR]]` |
-| 📘 Markdown | Carta de Responsabilidade       | `.md`            | Substitui `[[CARTA_RESP]]`   |
+| Tipo                            | Formato obrigatório | Inserção no DOCX | Observação importante        |
+| ------------------------------- | ------------------- | ---------------- | ---------------------------- |
+| Balanço Patrimonial (Parte 1)   | .png/.jpg           | Imagem           | seguir orientação de tamanho |
+| Balanço Patrimonial (Parte 2)   | .png/.jpg           | Imagem           | seguir orientação de tamanho |
+| Demonstração do Resultado (DRE) | .png/.jpg           | Imagem           | seguir orientação de tamanho |
+| Notas Explicativas              | .md                 | Conteúdo textual | **sem título interno**       |
+| Carta de Responsabilidade       | .md                 | Conteúdo textual | **sem título interno**       |
 
 ---
 
-### 🧾 C. Geração e Download
+## 🧾 5. Geração do Documento Final
 
-Após preencher tudo, clique em:
+Após o preenchimento:
 
-```
-✅ GERAR DOCUMENTO FINAL
-```
+1. Salva uploads temporários
+2. Converte `.md → .docx`
+3. Renderiza o template
+4. Insere seções no DOCX final
 
-O Streamlit exibirá uma mensagem de carregamento enquanto o Python:
-
-1. Salva os arquivos temporários
-2. Converte `.md → .docx` via `pypandoc`
-3. Renderiza o template `docxtpl`
-4. Substitui os blocos via `python-docx`
-
-📦 Resultado:
-Um arquivo como
-
-```
-Dossie_Contabil_<NOME_EMPRESA>.docx
-```
-
-pronto para download direto da interface.
-
----
-
-## 🧑‍💻 5. Notas Técnicas
-
-### 🔹 Arquivos Temporários
-
-O script usa o módulo `tempfile` para armazenar temporariamente todos os uploads e conversões, garantindo limpeza automática no final da execução.
-
-### 🔹 Substituição de Conteúdo
-
-O projeto combina:
-
-* **docxtpl** → para variáveis simples e imagens
-* **python-docx** → para inserir documentos inteiros (Notas/Carta) nos marcadores
-
-Isso mantém a **formatação completa dos blocos Markdown** ao incorporar no DOCX final.
+Saída: `Dossie_Contabil_<NOME_EMPRESA>.docx`
 
 ---
 
 ## 📜 Licença
 
-Este projeto é distribuído sob a licença MIT.
-Sinta-se à vontade para usar, adaptar e contribuir! 🤝
+Projeto sob licença MIT.
