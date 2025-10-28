@@ -184,7 +184,7 @@ with tab1:
         st.markdown("##### Período de Referência Contábil")
 
         data_inicio_default = datetime.date(datetime.date.today().year, 1,1)
-        data_fim_default = datetime.date(datetime.date.today().year, 12, 31)
+        data_fim_default = datetime.date.today()
 
         data_inicio = st.date_input(
             "Data de Início",
@@ -297,4 +297,4 @@ if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
             st.error(f"Falha na geração do documento. Detalhes: {error}")
             
     else:
-        st.warning("Por favor, faça o upload de todos os 5 arquivos antes de gerar.")
+        st.warning("Por favor, faça o upload de todos os 4 arquivos antes de gerar.")
