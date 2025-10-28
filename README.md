@@ -70,7 +70,7 @@ pip install streamlit docxtpl python-docx pypandoc
 ## 🖥️ 4. Instruções de Uso
 
 Você pode usar o gerador diretamente pelo site oficial publicado no Streamlit:
-👉 [https://automatizardossie.streamlit.app/](https://automatizardossie.streamlit.app/)
+👉 [automatizar_dossie](https://automatizardossie.streamlit.app/)
 
 Caso prefira rodar localmente, siga as instruções abaixo:
 
