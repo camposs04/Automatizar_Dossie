@@ -186,25 +186,22 @@ with tab1:
         data_inicio_default = datetime.date(datetime.date.today().year, 1,1)
         data_fim_default = datetime.date(datetime.date.today().year, 12, 31)
 
-        col_ini1, col_ini2, col_ini3 = st.columns(3)
-        with col_ini1:
-            dia_ini = st.number_input("Dia Início", min_value=1, max_value=31, value=1)
-        with col_ini2:
-            mes_ini = st.number_input("Mês Início", min_value=1, max_value=12, value=1)
-        with col_ini3:
-            ano_ini = st.number_input("Ano Início", min_value=1900, max_value=datetime.date.today().year, value=datetime.date.today().year)
+        data_inicio = st.date_input(
+            "Data de Início",
+            value=data_inicio_default,
+            min_value=datetime.date(1980, 1, 1),
+            max_value=datetime.date.today(),
+            key='data_inicio'
+        )
 
-        data_inicio = datetime.date(int(ano_ini), int(mes_ini), int(dia_ini))
+        data_fim = st.date_input(
+            "Data de Fim",
+            value=data_fim_default,
+            min_value=datetime.date(1980, 1, 1),
+            max_value=datetime.date.today(),
+            key='data_fim'
+        )
 
-        col_fim1, col_fim2, col_fim3 = st.columns(3)
-        with col_fim1:
-            dia_fim = st.number_input("Dia Fim", min_value=1, max_value=31, value=31)
-        with col_fim2:
-            mes_fim = st.number_input("Mês Fim", min_value=1, max_value=12, value=12)
-        with col_fim3:
-            ano_fim = st.number_input("Ano Fim", min_value=1900, max_value=datetime.date.today().year, value=datetime.date.today().year)
-
-        data_fim = datetime.date(int(ano_fim), int(mes_fim), int(dia_fim))
 
         mes_inicio_curto = str(data_inicio.month).zfill(2)
         ano_inicio_curto = str(data_inicio.year)[-2:]
