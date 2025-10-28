@@ -67,7 +67,7 @@ pip install streamlit docxtpl python-docx pypandoc
 └── templete_base_ofc.docx   # Template DOCX com marcadores Jinja2
 ```
 
-> 💡 Se o template estiver em um caminho fixo (ex: `/home/camposs/Desktop/estagio/desafio/`), garanta que ele seja acessível ao servidor Streamlit.
+> 💡 Se o template estiver em um caminho fixo (ex: `/home/pasta1/desafio/`), garanta que ele seja acessível ao servidor Streamlit.
 
 ---
 
@@ -81,7 +81,7 @@ No terminal, rode:
 streamlit run app_gerador.py
 ```
 
-Isso abrirá automaticamente o app no navegador → [http://localhost:8501](http://localhost:8501)
+Isso abrirá automaticamente o app no navegador → [automatizardossie](https://automatizardossie.streamlit.app/)
 
 ---
 

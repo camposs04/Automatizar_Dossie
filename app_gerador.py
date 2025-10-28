@@ -6,7 +6,7 @@ from docx import Document
 from docx.shared import Inches
 from io import BytesIO
 import fitz
-import datatime
+import datetime
 
 def pdf_balanco_duas_paginas(pdf_path):
     doc = fitz.open(pdf_path)
@@ -163,8 +163,8 @@ with tab1:
 
     with col2:
         st.markdown("##### Período de Referência Contábil")
-        data_inicio_default = datatime.date(datatime.date.today().year, 1,1)
-        data_fim_default = datatime.dade(datatime.date.today().year, 12, 31)
+        data_inicio_default = datetime.date(datetime.date.today().year, 1,1)
+        data_fim_default = datetime.dade(datetime.date.today().year, 12, 31)
         data_inicio = st.date_input("Data de Início", value = data_inicio_default, key = 'data_inicio')
         data_fim = st.date_input("Data de Fim", value = data_fim_default, key = 'data_fim')
         #input_data['periodo_anual'] = st.text_input("Período Anual (Descrição)", value="Junho a Agosto 2030")
