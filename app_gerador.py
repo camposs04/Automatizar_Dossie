@@ -6,6 +6,20 @@ from docx import Document
 from docx.shared import Inches
 from io import BytesIO
 import fitz
+import datatime
+
+def pdf_balanco_duas_paginas(pdf_path):
+    doc = fitz.open(pdf_path)
+    images = []
+
+    for i in range(2):
+        if i < len(doc):
+            pix = doc[i].get_pixmap(dpi = 200)
+            img_bytes = pix.tobytes("png")
+            images.append(img_bytes)
+        else:
+            images.append(None)
+    return images
 
 def pdf_to_images(pdf_path):
     images = []
@@ -38,7 +52,7 @@ def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_
 def generate_document(input_data):
     temp_paths = {}
     
-    # === A) Preparar Caminhos Temporários para Imagens e MDs ===
+    # === A) Preparar Caminhos Temporários para Imagens ===
     
     for key, uploaded_file in input_data['uploads'].items():
         if uploaded_file is not None:
@@ -63,8 +77,9 @@ def generate_document(input_data):
         
         doc = DocxTemplate(CAMINHO_TEMPLETE)
 
-        balanco_pt1_img = InlineImage(doc, temp_paths['balanco_pt1_file'], width=Inches(6))
-        balanco_pt2_img = InlineImage(doc, temp_paths['balanco_pt2_file'], width=Inches(6))
+        balanco_imgs = pdf_balanco_duas_paginas(temp_paths['balanco_file'])
+        balanco_pt1_img = InlineImage(doc, BytesIO(balanco_imgs[0]), width=Inches(6))
+        balanco_pt2_img = InlineImage(doc, BytesIO(balanco_imgs[1]), width=Inches(6))
 
         context = {
             'nome_empresa': input_data['nome_empresa'],
@@ -85,6 +100,7 @@ def generate_document(input_data):
         doc.save(TEMP_RENDERED)
 
         final_doc = Document(TEMP_RENDERED)
+
         insert_pdf_at_placeholder(final_doc, '[[DEMONSTR_RESULTADO]]', temp_paths['demstr_result_file'])
         insert_docx_at_placeholder(final_doc, '[[EXP_DEMONSTR]]', temp_paths['explic_demonstr_file'])
         insert_docx_at_placeholder(final_doc, '[[CARTA_RESP]]', temp_paths['carta_responsb_file'])
@@ -97,9 +113,13 @@ def generate_document(input_data):
     except Exception as e:
         if "No such file or directory" in str(e) and CAMINHO_TEMPLETE in str(e):
             return None, f"Erro: O template DOCX '{CAMINHO_TEMPLETE}' não foi encontrado no repositório. Certifique-se de que ele foi enviado ao GitHub."
+        
         if "No pandoc was found" in str(e):
              return None, f"Erro: O Pandoc é necessário para converter Markdown. Por favor, instale o Pandoc no ambiente ou use uma solução de deploy que o inclua. Erro detalhado: {e}"
-        
+
+        if "index out of range" in str(e):
+             return None, f"Erro: O arquivo 'Balanco Patrimonial' (PDF) deve ter pelo menos 2 páginas. Detalhes: {e}"
+       
         return None, f"Erro durante a geração: {e}"
     
     finally:
@@ -127,6 +147,12 @@ tab1, tab2, tab3 = st.tabs(["Dados da Empresa/Períodos", "Dados dos Sócios", "
 
 input_data = {}
 
+meses_pt = {
+    1:"Janeiro", 2:"Fevereiro", 3:"Março", 4:"Abril",
+    5:"Maio", 6:"Junho", 7:"Julho", 8:"Agosto",
+    9:"Setembro", 10:"Outubro",11:"Novembro",12:"Dezembro"
+}
+
 with tab1:
     col1, col2 = st.columns(2)
     
@@ -136,9 +162,38 @@ with tab1:
         input_data['cnpj_empresa'] = st.text_input("CNPJ", value="23.766.826/0001-61", help="Formato: 00.000.000/0000-00")
 
     with col2:
-        input_data['periodo_anual'] = st.text_input("Período Anual (Descrição)", value="Junho a Agosto 2030")
+        st.markdown("##### Período de Referência Contábil")
+        data_inicio_default = datatime.date(datatime.date.today().year, 1,1)
+        data_fim_default = datatime.dade(datatime.date.today().year, 12, 31)
+        data_inicio = st.date_input("Data de Início", value = data_inicio_default, key = 'data_inicio')
+        data_fim = st.date_input("Data de Fim", value = data_fim_default, key = 'data_fim')
+        #input_data['periodo_anual'] = st.text_input("Período Anual (Descrição)", value="Junho a Agosto 2030")
         input_data['data_dem_encerradas'] = st.text_input("Demonstrações Contábeis Encerradas em", value="07/02/2005", help="Formato: DD/MM/AAAA")
         input_data['periodo_em_data'] = st.text_input("Período de Referência", value="07 a 12/2030")
+
+        mes_inicio_curto = str(data_inicio.month).zfill(2)
+        ano_inicio_curto = str(data_inicio.year)[-2:]
+        mes_fim_curto = str(data_fim.month).zfill(2)
+        ano_fim_curto = str(data_fim.year)[-2:]
+        
+        if data_inicio.year != data_fim.year:
+             input_data['periodo_em_data'] = f"{mes_inicio_curto}/{ano_inicio_curto} a {mes_fim_curto}/{ano_fim_curto}"
+        else:
+             input_data['periodo_em_data'] = f"{mes_inicio_curto} a {mes_fim_curto}/{ano_fim_curto}"
+        
+        mes_desc_inicio = meses_pt.get(data_inicio.month)
+        mes_desc_fim = meses_pt.get(data_fim.month)
+        
+        if data_inicio.year == data_fim.year:
+            periodo_anual_desc = f"{mes_desc_inicio} a {mes_desc_fim} de {data_inicio.year}"
+        else:
+            periodo_anual_desc = f"{mes_desc_inicio} de {data_inicio.year} a {mes_desc_fim} de {data_fim.year}"
+
+        input_data['periodo_anual'] = periodo_anual_desc
+        
+        st.markdown(f"**Período de Referência (periodo_em_data):** `{input_data['periodo_em_data']}`")
+        st.markdown(f"**Descrição Anual (periodo_anual):** `{input_data['periodo_anual']}`")
+
 
 with tab2:
     st.subheader("Dados dos Sócios")
@@ -162,12 +217,11 @@ input_data["socios"] = st.session_state.socios
 input_data['uploads'] = {}
 
 with tab3:
-    st.subheader("Imagens de Demonstrações (PNG ou JPG)")
+    st.subheader("Balancos e Demonstrações (PDF)")
     col5, col6 = st.columns(2)
     
     with col5:
-        input_data['uploads']['balanco_pt1_file'] = st.file_uploader("Balanco Patrimonial (Ativo)", type=["png", "jpg"], key='balanco_1')
-        input_data['uploads']['balanco_pt2_file'] = st.file_uploader("Balanco Patrimonial (Passivo)", type=["png", "jpg"], key='balanco_2')
+        input_data['uploads']['balanco_file'] = st.file_uploader("Balanco Patrimonial (PDF)", type=["pdf"])
     with col6:
         input_data['uploads']['demstr_result_file'] = st.file_uploader("Demonstração do Resultado (DRE)", type=["pdf"])
 
@@ -180,7 +234,7 @@ with tab3:
 
 if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
     required_files = [
-        'balanco_pt1_file', 'balanco_pt2_file', 'demstr_result_file', 
+        'balanco_file', 'demstr_result_file', 
         'explic_demonstr_file', 'carta_responsb_file'
     ]
     
