@@ -75,7 +75,7 @@ def generate_document(input_data):
 
     data_e_hora_atual = datetime.datetime.now()
     dia = data_e_hora_atual.day
-    mes = meses_pt_longo[data_e_hora_atual.month]
+    mes = meses_pt[data_e_hora_atual.month]
     ano = data_e_hora_atual.year
     data_atual_formatada = f"{dia} de {mes} de {ano}"
     
