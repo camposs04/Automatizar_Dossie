@@ -162,13 +162,23 @@ with tab1:
         input_data['cnpj_empresa'] = st.text_input("CNPJ", value="23.766.826/0001-61", help="Formato: 00.000.000/0000-00")
 
     with col2:
+
+        data_encerradas_dt = st.date_input(
+            "Demonstrações Contábeis Encerradas em", 
+            value=datetime.date(2005, 2, 7),
+            help="Selecione a data de encerramento das demonstrações. (Ex: 07/02/2005)"
+        )
+        input_data['data_dem_encerradas'] = data_encerradas_dt.strftime("%d/%m/%Y")
+
         st.markdown("##### Período de Referência Contábil")
+
         data_inicio_default = datetime.date(datetime.date.today().year, 1,1)
         data_fim_default = datetime.date(datetime.date.today().year, 12, 31)
+
         data_inicio = st.date_input("Data de Início", value = data_inicio_default, key = 'data_inicio')
         data_fim = st.date_input("Data de Fim", value = data_fim_default, key = 'data_fim')
         input_data['data_dem_encerradas'] = st.text_input("Demonstrações Contábeis Encerradas em", value="07/02/2005", help="Formato: DD/MM/AAAA")
-        input_data['periodo_em_data'] = st.text_input("Período de Referência", value="07 a 12/2030")
+        #input_data['periodo_em_data'] = st.text_input("Período de Referência", value="07 a 12/2030")
 
         mes_inicio_curto = str(data_inicio.month).zfill(2)
         ano_inicio_curto = str(data_inicio.year)[-2:]
@@ -190,6 +200,7 @@ with tab1:
 
         input_data['periodo_anual'] = periodo_anual_desc
         
+        st.markdown("---")
         st.markdown(f"**Período de Referência (periodo_em_data):** `{input_data['periodo_em_data']}`")
         st.markdown(f"**Descrição Anual (periodo_anual):** `{input_data['periodo_anual']}`")
 
