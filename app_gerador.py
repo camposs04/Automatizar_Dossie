@@ -63,6 +63,12 @@ def insert_docx_at_placeholder(main_doc: Document, placeholder: str, insert_doc_
             for element in reversed(insert_doc.element.body):
                 paragraph._element.addnext(element)
             return True
+        
+meses_pt = {
+    1:"Janeiro", 2:"Fevereiro", 3:"Março", 4:"Abril",
+    5:"Maio", 6:"Junho", 7:"Julho", 8:"Agosto",
+    9:"Setembro", 10:"Outubro",11:"Novembro",12:"Dezembro"
+}
 
 def generate_document(input_data):
     temp_paths = {}
@@ -166,12 +172,6 @@ st.markdown("Preencha os campos e faça o upload dos arquivos para gerar o dossi
 tab1, tab2, tab3 = st.tabs(["Dados da Empresa/Períodos", "Dados dos Sócios", "Upload de Arquivos"])
 
 input_data = {}
-
-meses_pt = {
-    1:"Janeiro", 2:"Fevereiro", 3:"Março", 4:"Abril",
-    5:"Maio", 6:"Junho", 7:"Julho", 8:"Agosto",
-    9:"Setembro", 10:"Outubro",11:"Novembro",12:"Dezembro"
-}
 
 with tab1:
     col1, col2 = st.columns(2)
