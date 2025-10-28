@@ -236,7 +236,7 @@ with tab2:
         st.session_state.socios = [{"nome": "", "cpf": "", "cargo": ""}]
 
     for i, socio in enumerate(st.session_state.socios):
-        st.write(f"#####--- Sócio {i+1} ---")
+        st.write(f"##### --- Sócio {i+1} ---")
         socio["nome"] = st.text_input(f"Nome do Sócio {i+1}", value=socio["nome"], key=f"nome_{i}")
 
         cpf_input = f"cpf_input_{i}"
