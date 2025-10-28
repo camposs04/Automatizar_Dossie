@@ -8,6 +8,21 @@ from io import BytesIO
 import fitz
 import datetime
 
+def clean_numbers(text):
+    return "".join(filter(str.isdigit, str(text)))
+
+def format_cnpj(cnpj):
+    cnpj = clean_numbers(cnpj)
+    if len(cnpj) == 14:
+        return f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"
+    return cnpj
+
+def format_cpf(cpf):
+    cpf = clean_numbers(cpf)
+    if len(cpf) == 11:
+        return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
+    return cpf
+
 def pdf_balanco_duas_paginas(pdf_path):
     doc = fitz.open(pdf_path)
     images = []
@@ -159,7 +174,10 @@ with tab1:
     with col1:
         input_data['nome_empresa'] = st.text_input("Nome Fantasia da Empresa", value="TESTE do Nome")
         input_data['razao_social_empresa'] = st.text_input("Razão Social", value="TESTE RAZAO EMPRESA LTDA SCP VTG")
-        input_data['cnpj_empresa'] = st.text_input("CNPJ", value="23.766.826/0001-61", help="Formato: 00.000.000/0000-00")
+
+        cnpj_input = st.text_input("CNPJ ", value= "23766826000161")
+        input_data['cnpj_empresa'] = clean_numbers(cnpj_input)
+        st.markdown(f"**CNPJ Formatado:** `{format_cnpj(input_data['cnpj_empresa'])}`")
 
     with col2:
 
@@ -170,8 +188,6 @@ with tab1:
 
         data_inicio = st.date_input("Data de Início", value = data_inicio_default, key = 'data_inicio')
         data_fim = st.date_input("Data de Fim", value = data_fim_default, key = 'data_fim')
-        #input_data['data_dem_encerradas'] = st.text_input("Demonstrações Contábeis Encerradas em", value="07/02/2005", help="Formato: DD/MM/AAAA")
-        #input_data['periodo_em_data'] = st.text_input("Período de Referência", value="07 a 12/2030")
 
         mes_inicio_curto = str(data_inicio.month).zfill(2)
         ano_inicio_curto = str(data_inicio.year)[-2:]
@@ -208,7 +224,13 @@ with tab2:
     for i, socio in enumerate(st.session_state.socios):
         st.write(f"--- Sócio {i+1} ---")
         socio["nome"] = st.text_input(f"Nome do Sócio {i+1}", value=socio["nome"], key=f"nome_{i}")
-        socio["cpf"] = st.text_input(f"CPF do Sócio {i+1}", value=socio["cpf"], key=f"cpf_{i}")
+
+        cpf_input = f"cpf_input_{i}"
+        cpf_value = st.text_input(f"CPF do Sócio {i+1}", value=clean_numbers(socio["cpf"]), key=cpf_input)
+        st.session_state.socio[i]["cpf"]= clean_numbers(cpf_value)
+
+        st.markdown(f"**CPF Formatado:** `{format_cpf(st.session_state.socios[i]['cpf'])}`")
+        
         socio["cargo"] = st.text_input(f"Cargo do Sócio {i+1}", value=socio["cargo"], key=f"cargo_{i}")
         if st.button(f"Remover Sócio {i+1}", key=f"remove_{i}"):
             st.session_state.socios.pop(i)
