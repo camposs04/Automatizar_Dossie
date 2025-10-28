@@ -227,7 +227,7 @@ with tab2:
 
         cpf_input = f"cpf_input_{i}"
         cpf_value = st.text_input(f"CPF do Sócio {i+1}", value=clean_numbers(socio["cpf"]), key=cpf_input)
-        st.session_state.socio[i]["cpf"]= clean_numbers(cpf_value)
+        st.session_state.socios[i]["cpf"]= clean_numbers(cpf_value)
 
         st.markdown(f"**CPF Formatado:** `{format_cpf(st.session_state.socios[i]['cpf'])}`")
         
