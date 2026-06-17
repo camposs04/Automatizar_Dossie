@@ -92,7 +92,7 @@ def generate_document(input_data):
             return None, f"O arquivo {key} é obrigatório!"
     
     # === B) Definir os Caminhos Finais para a Lógica de Geração ===
-    CAMINHO_TEMPLETE = "templete_base_ofc.docx"
+    CAMINHO_TEMPLETE = "template_base_ofc.docx"
     
     TEMP_BASE_DOCX = os.path.join(tempfile.gettempdir(), "temporario_base.docx")
     TEMP_CART_DOCX = os.path.join(tempfile.gettempdir(), "temp_cart.docx")
