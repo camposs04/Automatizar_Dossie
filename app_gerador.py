@@ -1,3 +1,5 @@
+import json
+import requests
 import streamlit as st
 import os
 import tempfile
@@ -292,12 +294,53 @@ if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
         
         if file_data:
             st.success("Documento gerado com sucesso!")
+            
+            # 1. Botão tradicional de download no Streamlit
             st.download_button(
                 label="Clique para Baixar Document.docx",
                 data=file_data,
                 file_name=f"Dossie_Contabil_{input_data['nome_empresa']}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
+            
+            # =================================================================
+            # 🚀 ENTRADA DA INTEGRAÇÃO COM O N8N
+            # =================================================================
+            with st.spinner("Enviando dados e documento para o n8n..."):
+                # Substitua pela sua URL do Webhook do n8n (recomenda-se a Test URL primeiro)
+                N8N_WEBHOOK_URL = "COLE_SUA_URL_DO_WEBHOOK_AQUI"
+                
+                # Dados de texto que você quer enviar (Metadados)
+                # Como 'socios' é uma lista de dicionários, transformamos em string JSON
+                payload = {
+                    "nome_empresa": input_data['nome_empresa'],
+                    "razao_social_empresa": input_data['razao_social_empresa'],
+                    "cnpj_empresa": input_data['cnpj_empresa'],
+                    "periodo_anual": input_data['periodo_anual'],
+                    "periodo_em_data": input_data['periodo_em_data'],
+                    "data_dem_encerradas": input_data['data_dem_encerradas'],
+                    "socios": json.dumps(input_data['socios']) 
+                }
+                
+                # Arquivo binário gerado pelo seu script (.docx)
+                nome_arquivo_final = f"Dossie_Contabil_{input_data['nome_empresa']}.docx"
+                files = {
+                    "arquivo_dossie": (nome_arquivo_final, file_data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                }
+                
+                try:
+                    # Enviamos como multipart/form-data (data + files)
+                    response = requests.post(N8N_WEBHOOK_URL, data=payload, files=files)
+                    
+                    if response.status_code == 200:
+                        st.info("➡️ Automação disparada no n8n com sucesso!")
+                    else:
+                        st.error(f"O n8n recebeu a tentativa, mas retornou erro {response.status_code}")
+                        
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Falha ao conectar com o n8n: {e}")
+            # =================================================================
+            
         else:
             st.error(f"Falha na geração do documento. Detalhes: {error}")
             
