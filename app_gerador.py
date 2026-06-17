@@ -308,7 +308,7 @@ if st.button("✅ GERAR DOCUMENTO FINAL", type="primary"):
             # =================================================================
             with st.spinner("Enviando dados e documento para o n8n..."):
                 # Substitua pela sua URL do Webhook do n8n (recomenda-se a Test URL primeiro)
-                N8N_WEBHOOK_URL = "COLE_SUA_URL_DO_WEBHOOK_AQUI"
+                N8N_WEBHOOK_URL = "https://genai.up4me.io/webhook-test/receber-dados"
                 
                 # Dados de texto que você quer enviar (Metadados)
                 # Como 'socios' é uma lista de dicionários, transformamos em string JSON
